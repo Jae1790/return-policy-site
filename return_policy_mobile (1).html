@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Return Policy Access</title>
+  <style>
+    :root {
+      --bg: #f4f4f1;
+      --card: #ffffff;
+      --text: #141414;
+      --muted: #666666;
+      --line: #d9d9d2;
+      --accent: #111111;
+      --disabled: #bdbdb6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 18px 14px 24px;
+    }
+    .shell {
+      width: 100%;
+      max-width: 480px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .title-wrap h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .title-wrap p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .progress {
+      min-width: 70px;
+      text-align: right;
+      font-size: 12px;
+      color: var(--muted);
+      padding-top: 2px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .card-header {
+      border-bottom: 1px solid var(--line);
+      padding: 14px 16px;
+      background: #fafaf8;
+    }
+    .card-header .section-label {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .card-header h2 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.3;
+      font-weight: 700;
+    }
+    .card-body {
+      padding: 16px;
+      font-size: 10pt;
+      line-height: 1.62;
+      min-height: 58vh;
+    }
+    .card-body p {
+      margin: 0 0 14px;
+    }
+    .card-body p:last-child { margin-bottom: 0; }
+    .controls {
+      position: sticky;
+      bottom: 0;
+      background: linear-gradient(to top, rgba(244,244,241,1) 82%, rgba(244,244,241,0));
+      padding-top: 12px;
+      margin-top: 10px;
+    }
+    .control-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .check-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .check-wrap input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 1px;
+      accent-color: #111111;
+      flex: 0 0 auto;
+    }
+    .check-wrap label {
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 11px;
+      padding: 13px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      flex: 1 1 auto;
+      transition: transform 0.05s ease, opacity 0.2s ease, background 0.2s ease;
+    }
+    button:active { transform: translateY(1px); }
+    .secondary {
+      background: #edede8;
+      color: #2c2c2c;
+    }
+    .secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+    .primary:disabled {
+      background: var(--disabled);
+      cursor: not-allowed;
+      transform: none;
+    }
+    .done-screen {
+      display: none;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      padding: 22px 18px;
+      margin-top: 10px;
+    }
+    .done-screen h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    .done-screen p {
+      margin: 0 0 12px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .done-meta {
+      font-size: 10pt;
+      line-height: 1.6;
+      color: var(--text);
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+    @media (max-width: 380px) {
+      .card-body { min-height: 54vh; }
+      .buttons { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="shell">
+      <div class="topbar">
+        <div class="title-wrap">
+          <h1>Return Policy</h1>
+          <p>Sequential mobile reading view. Each section requires confirmation before proceeding.</p>
+        </div>
+        <div class="progress" id="progressLabel">Page 1 / 20</div>
+      </div>
+
+      <div class="card" id="policyCard">
+        <div class="card-header">
+          <div class="section-label">Return Policy Archive</div>
+          <h2 id="pageTitle">Section 1</h2>
+        </div>
+        <div class="card-body" id="pageContent"></div>
+      </div>
+
+      <div class="controls" id="controlsWrap">
+        <div class="control-card">
+          <div class="check-wrap">
+            <input type="checkbox" id="agreeCheck" />
+            <label for="agreeCheck">모두 확인했고 동의합니다. I have read this section and agree to proceed.</label>
+          </div>
+          <div class="buttons">
+            <button class="secondary" id="prevBtn">Previous</button>
+            <button class="primary" id="nextBtn" disabled>Next Section</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="done-screen" id="doneScreen">
+        <h3>Policy Review Complete</h3>
+        <p>You have reached the end of the return policy sequence.</p>
+        <div class="done-meta">
+          <strong>Status:</strong> Full review completed<br/>
+          <strong>Access Level:</strong> Verified reader<br/>
+          <strong>Document:</strong> Return Policy / 20 sections
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const pages = [
+      {
+        title: "Section 1 — Scope of Return Access",
+        paragraphs: [
+          "This return policy governs requests initiated through supported online or in-store channels. It applies to merchandise identified by an active order number, a valid payment record, and a matching customer account or approved guest transaction. Access to the return workflow does not guarantee acceptance of a refund, replacement, exchange, or recovery outcome.",
+          "By entering this policy sequence, the reader acknowledges that every return request is evaluated within a larger operational system that includes transport, inspection, routing, and final disposition. The display of a return option on screen should not be interpreted as evidence that a returned product will automatically re-enter inventory or recover its original value.",
+          "The company reserves the right to verify order history, item condition, serial number consistency, packaging completeness, and usage indicators before any return determination is finalized. Additional documentation may be requested if the product category requires traceability, hazard review, authentication review, or regulated handling procedures."
+        ]
+      },
+      {
+        title: "Section 2 — Eligibility Window",
+        paragraphs: [
+          "Standard return eligibility begins on the recorded delivery date and ends at the close of the published return window for the item category. Certain categories may be subject to shorter windows, restricted windows, or non-returnable conditions due to hygiene, safety, perishability, customization, software activation, or legal compliance obligations.",
+          "A return request submitted within the visible eligibility period may still be denied if the item was materially altered, incompletely returned, damaged after delivery, missing essential components, or transferred outside normal consumer use. Eligibility windows do not supersede inspection outcomes.",
+          "Products marked final sale, clearance restricted, hazardous, intimate, activated, or made-to-order may display interface-level return prompts for customer assistance but remain subject to non-returnable classification under policy review."
+        ]
+      },
+      {
+        title: "Section 3 — Account Verification",
+        paragraphs: [
+          "To initiate a return, the account holder or authorized purchaser must provide information sufficient to match the product to a completed order event. This may include customer name, order number, confirmation email, billing fragment, shipping destination, or serial identifier where relevant.",
+          "The company may temporarily suspend a return pathway if unusual account activity, repeated dispute activity, suspected fraud, excessive return frequency, payment reversal behavior, or account mismatch is detected. Additional verification may be required before the request can continue.",
+          "Where an account cannot be validated through standard procedures, support review may assign a delayed path, request manual evidence, or classify the request as unsupported."
+        ]
+      },
+      {
+        title: "Section 4 — Reason Codes",
+        paragraphs: [
+          "The customer-facing interface may ask the returner to select a reason code such as size issue, damaged item, not as described, duplicate order, changed mind, delayed delivery, or other. These codes improve routing efficiency but do not function as final determinations of responsibility or refund outcome.",
+          "Reason selection influences internal handling logic, package triage, category routing, and exception review. Some reason codes trigger faster review streams, while others require more detailed inspection, image evidence, technical testing, or seller-side confirmation.",
+          "False or inconsistent reason selection may result in adjusted refund outcomes, account warnings, delayed processing, or denial if the selected reason is found to conflict with inspection results."
+        ]
+      },
+      {
+        title: "Section 5 — Packaging Requirements",
+        paragraphs: [
+          "Returned merchandise should be packaged to minimize avoidable damage during reverse transit. Unless a carrier-specific label-free method is explicitly offered, the customer must secure the item in appropriate outer packaging with sufficient protection for the product category.",
+          "Original packaging may be preferred but is not always mandatory. However, missing protective inserts, documentation, accessories, tags, molded trays, or category-specific safety materials may materially affect inspection classification and subsequent recovery options.",
+          "The company may classify a return as incomplete if protective packaging was clearly insufficient for reverse movement and avoidable transport damage occurred before intake."
+        ]
+      },
+      {
+        title: "Section 6 — Label and Drop-off Pathways",
+        paragraphs: [
+          "Available return methods may include print-at-home labels, label-free drop-off, staffed counter acceptance, parcel locker return, scheduled pickup, store drop, or carrier-specific consolidation channels. Availability depends on geography, product category, order value, and operational capacity.",
+          "A visible label or code does not indicate a direct route to the original warehouse. Returns may be consolidated, rerouted, held for batch movement, or transferred across nodes before arriving at an authorized intake point.",
+          "Customers remain responsible for following carrier instructions linked to the selected method. Improper handoff, mislabeling, or delayed handoff can interrupt tracking continuity."
+        ]
+      },
+      {
+        title: "Section 7 — Transit and Tracking",
+        paragraphs: [
+          "Once accepted by the selected channel, a return enters the reverse logistics network. Tracking visibility may update immediately, with delay, or only at major scan points depending on the route architecture and carrier integration level.",
+          "Unlike outbound delivery, return transit may involve consolidation, deferred scanning, route balancing, and cross-node transfers before reaching an inspection facility. Movement through the network can therefore differ substantially from the original shipment path.",
+          "Estimated timelines remain non-binding during periods of high return volume, weather disruption, labor disruption, route imbalance, or facility backlog."
+        ]
+      },
+      {
+        title: "Section 8 — Intake Registration",
+        paragraphs: [
+          "When the return reaches an authorized facility, the system first records intake. This step may include barcode confirmation, order match review, container opening, quantity count, and visible condition screening before deeper assessment begins.",
+          "Intake registration confirms receipt into the operational system; it does not confirm approval of a refund, resale suitability, or final product fate. At this stage, the item is transitioning from customer possession into internal process control.",
+          "Products arriving with packaging failure, contamination, odor, missing parts, or non-matching contents may be diverted to exception handling before standard inspection proceeds."
+        ]
+      },
+      {
+        title: "Section 9 — Inspection Workflow",
+        paragraphs: [
+          "Inspection is a critical decision layer within reverse logistics. Workers or designated review systems may open packages, verify contents, assess packaging completeness, review wear indicators, test limited functions, authenticate key details, and assign a condition code for routing.",
+          "The same product type may produce different outcomes depending on condition, category rules, regulatory limits, refurbishment feasibility, hygiene status, and the cost of handling relative to recoverable value.",
+          "Inspection results may classify a product for resale, refurbishment, parts recovery, liquidation, return-to-seller, secure destruction, recycling, or disposal."
+        ]
+      },
+      {
+        title: "Section 10 — Condition Categories",
+        paragraphs: [
+          "Returned merchandise may be categorized as unopened, like new, open box, lightly used, cosmetically damaged, functionally impaired, incomplete, contaminated, unsafe, or non-compliant. These categories determine what processing path remains available.",
+          "A product can be technically functional and still fail to qualify for direct resale if restoration, cleaning, repackaging, testing, or certification costs exceed acceptable thresholds. Condition classification is therefore operational as well as physical.",
+          "The company is not required to restore a product to shelf condition if such restoration would create disproportionate time, labor, or cost burdens."
+        ]
+      },
+      {
+        title: "Section 11 — Refund Determination",
+        paragraphs: [
+          "Refund timing depends on the selected return method, payment rail, carrier confirmation, intake registration, and inspection outcome. In some cases, an advance refund may appear before final review, but such early credit remains conditional until the item passes policy checks.",
+          "Refund amounts may be adjusted if the return is incomplete, materially different from the original order, damaged beyond expected open-box handling, or submitted outside policy terms. Partial refunds, credit denials, or non-refundable outcomes may apply.",
+          "Where marketplace sellers or third-party fulfillment partners are involved, final refund control may require partner-side authorization."
+        ]
+      },
+      {
+        title: "Section 12 — Exchange and Replacement",
+        paragraphs: [
+          "Some products may qualify for replacement or exchange instead of refund. Availability depends on stock position, seller rules, category constraints, and route architecture. Replacement approval does not guarantee that the returned item will re-enter saleable inventory.",
+          "Returned products linked to exchanges may still follow a separate inspection and recovery path. The replacement process is therefore operationally distinct from the afterlife of the original item.",
+          "Where replacement stock is limited, the company may substitute a refund path or store-credit path at its discretion."
+        ]
+      },
+      {
+        title: "Section 13 — Exception Handling",
+        paragraphs: [
+          "Items that fail standard processing may be transferred to exception review. This includes mismatched items, suspected abuse, counterfeit indicators, damaged serial labels, contamination issues, safety concerns, or category-specific anomalies.",
+          "Exception handling may extend processing time and may involve specialist review, image capture, technical testing, or seller consultation. During this period, refund status may remain pending or provisional.",
+          "The company may decline to return certain unsafe, prohibited, or non-original items to the sender if doing so would violate policy, carrier rules, or legal obligations."
+        ]
+      },
+      {
+        title: "Section 14 — Recovery Pathways",
+        paragraphs: [
+          "Recovered value can move through multiple channels. Depending on category and condition, products may be returned to primary inventory, sold as open-box goods, routed into refurbished channels, redirected to liquidation networks, harvested for parts, or transferred to secondary recovery operations.",
+          "Not all recovery pathways are visible to the customer. Internal routing prioritizes operational efficiency, legal compliance, and cost containment rather than narrative transparency.",
+          "A return that appears simple at the interface level may therefore activate a complex chain of hidden downstream decisions."
+        ]
+      },
+      {
+        title: "Section 15 — Disposal and Destruction",
+        paragraphs: [
+          "When recovery is judged economically or operationally non-viable, the system may classify the item for final disposition. Disposition may include material recycling, regulated waste processing, secure destruction, textile shredding, destruction for brand protection, or landfill-directed waste handling depending on category and condition.",
+          "Products can reach disposal even when partially usable if transport, testing, cleaning, storage, certification, repackaging, or resale efforts exceed acceptable thresholds. The system is not obligated to preserve value when doing so disrupts throughput or cost targets.",
+          "Disposition is final. Once an item exits circulation through this channel, the reversible appearance of the consumer return pathway ends."
+        ]
+      },
+      {
+        title: "Section 16 — Environmental and Operational Disclosure",
+        paragraphs: [
+          "Return systems create downstream environmental and operational impacts through repeated transport, packaging consumption, sorting labor, facility energy use, and material loss. The company may provide selective sustainability language in customer-facing interfaces, but such language does not represent a full accounting of the reverse logistics footprint.",
+          "Consolidation methods may reduce some route intensity while increasing other forms of handling. Reduced packaging at one point in the process does not guarantee reduced total impact across the full return chain.",
+          "The company makes no representation that a returned product will be reused, resold, or recycled."
+        ]
+      },
+      {
+        title: "Section 17 — Marketplace and Third-Party Variation",
+        paragraphs: [
+          "Orders fulfilled by third-party sellers, regional carriers, brand partners, or marketplace programs may operate under parallel rules layered over this general policy. Customers may encounter different windows, return labels, costs, inspection outcomes, or refund timing depending on seller participation level.",
+          "Where policies conflict, the company may prioritize platform-level risk controls, statutory obligations, or seller-side constraints. Some requests may therefore proceed through multiple review entities before completion.",
+          "Visibility of these differences at the interface level may remain limited."
+        ]
+      },
+      {
+        title: "Section 18 — Abuse Prevention and Restrictions",
+        paragraphs: [
+          "The company reserves the right to deny, limit, suspend, or flag return privileges where patterns indicate policy abuse, repeated wardrobing behavior, mismatched contents, inventory switching, serial-number substitution, resold items, account manipulation, or other conduct incompatible with policy terms.",
+          "Preventive measures may include refund holds, account review, return channel reduction, requirement of manual approval, or permanent restriction from certain return methods.",
+          "Abuse prevention systems may operate automatically, manually, or through combined review models."
+        ]
+      },
+      {
+        title: "Section 19 — Legal, Regional, and Category Conditions",
+        paragraphs: [
+          "Nothing in this policy overrides mandatory consumer rights required by applicable law. Regional law, payment regulation, product safety law, accessibility law, and sector-specific compliance requirements may modify, limit, or expand the available return pathways described in this document.",
+          "Some categories, including electronics, batteries, perishables, personal care goods, custom products, and regulated goods, may trigger special handling or disposal protocols not visible in the general customer flow.",
+          "Where law conflicts with platform policy, applicable legal requirements govern."
+        ]
+      },
+      {
+        title: "Section 20 — Final Acknowledgement",
+        paragraphs: [
+          "By reaching this final section, the reader acknowledges that a return request is not a single event but a layered operational process involving transport, inspection, recovery logic, and possible disposal. Customer convenience at the interface level exists alongside a larger system of hidden labor, routing, and material management.",
+          "Proceeding from this point confirms that the reader has reviewed the sequential structure of the policy and understands that outcome visibility, refund speed, and item recovery are all conditional rather than guaranteed.",
+          "This acknowledgement records completion of the reading sequence only. It does not itself approve or deny any real-world return."
+        ]
+      }
+    ];
+
+    let currentPage = 0;
+    const confirmations = Array(pages.length).fill(false);
+
+    const progressLabel = document.getElementById('progressLabel');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageContent = document.getElementById('pageContent');
+    const agreeCheck = document.getElementById('agreeCheck');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const policyCard = document.getElementById('policyCard');
+    const controlsWrap = document.getElementById('controlsWrap');
+    const doneScreen = document.getElementById('doneScreen');
+
+    function renderPage() {
+      const page = pages[currentPage];
+      progressLabel.textContent = `Page ${currentPage + 1} / ${pages.length}`;
+      pageTitle.textContent = page.title;
+      pageContent.innerHTML = page.paragraphs.map(p => `<p>${p}</p>`).join('');
+      agreeCheck.checked = confirmations[currentPage];
+      prevBtn.disabled = currentPage === 0;
+      nextBtn.disabled = !agreeCheck.checked;
+      nextBtn.textContent = currentPage === pages.length - 1 ? 'Finish Review' : 'Next Section';
+    }
+
+    agreeCheck.addEventListener('change', () => {
+      confirmations[currentPage] = agreeCheck.checked;
+      nextBtn.disabled = !agreeCheck.checked;
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 0) {
+        currentPage -= 1;
+        renderPage();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (!confirmations[currentPage]) return;
+      if (currentPage < pages.length - 1) {
+        currentPage += 1;
+        renderPage();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        policyCard.style.display = 'none';
+        controlsWrap.style.display = 'none';
+        doneScreen.style.display = 'block';
+        progressLabel.textContent = `Completed / ${pages.length} sections`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+
+    renderPage();
+  </script>
+</body>
+</html>
